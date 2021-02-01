@@ -1,1 +1,1 @@
-This is a useful redis client commnad. 
+This is a useful redis client command. 

@@ -23,20 +23,25 @@ func main() {
 
 func buildRootCommand(app *commands.App) *cobra.Command {
 	cmdRoot := &cobra.Command{
-		Use: "grc",
+		Use:   "grc",
 		Short: "grc is golang redis client.",
 	}
 	return cmdRoot
 }
 
 func buildZaddCommand(app *commands.App) *cobra.Command {
-	cmdRoot := &cobra.Command{
+	var period int
+
+	cmdZadd := &cobra.Command{
 		Use: "zadd",
-		Run: func(cmd *cobra.Command, args []string){
+		Run: func(cmd *cobra.Command, args []string) {
 			key, score, value := args[0], args[1], args[2]
-			app.Zadd(key, score, value)
+			app.Zadd(key, score, value, period)
 		},
 		Args: cobra.ExactArgs(3),
 	}
-	return cmdRoot
+
+	cmdZadd.Flags().IntVar(&period, "period", 0, "How long does it keep executing?")
+
+	return cmdZadd
 }

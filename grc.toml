@@ -2,3 +2,5 @@ host = "localhost"
 port = "6379"
 password = ""
 db = 0
+# interval time (second) between each executions.
+interval = 3

@@ -9,6 +9,7 @@ type Config struct {
 	Port     string
 	Password string
 	Db       int
+	Interval int
 }
 
 func Load() (*Config, error) {
