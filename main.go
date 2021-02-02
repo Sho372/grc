@@ -31,17 +31,19 @@ func buildRootCommand(app *commands.App) *cobra.Command {
 
 func buildZaddCommand(app *commands.App) *cobra.Command {
 	var period int
+	var repeat int
 
 	cmdZadd := &cobra.Command{
 		Use: "zadd",
 		Run: func(cmd *cobra.Command, args []string) {
 			key, score, value := args[0], args[1], args[2]
-			app.Zadd(key, score, value, period)
+			app.Zadd(key, score, value, period, repeat)
 		},
 		Args: cobra.ExactArgs(3),
 	}
 
 	cmdZadd.Flags().IntVar(&period, "period", 0, "How long does it keep executing?")
+	cmdZadd.Flags().IntVar(&repeat, "repeat", 1, "How many times does it repeat?")
 
 	return cmdZadd
 }

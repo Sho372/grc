@@ -3,11 +3,13 @@ package commands
 import (
 	"context"
 	"fmt"
+	"log"
+	"strconv"
+	"time"
+
 	"github.com/Sho372/grc/client"
 	"github.com/Sho372/grc/config"
 	"github.com/go-redis/redis/v8"
-	"log"
-	"time"
 )
 
 type App struct {
@@ -31,19 +33,16 @@ func New() (*App, error) {
 	return a, nil
 }
 
-func (a *App) Zadd(key string, score string, value string, period int) {
+func (a *App) Zadd(key string, score string, value string, period int, repeat int) {
 	cxt := context.Background()
 
 	if period == 0 {
-		val, err := a.Rdb.Rdb.Do(cxt, "zadd", key, score, value).Result()
-		if err != nil {
-			if err == redis.Nil {
-				fmt.Printf("%s does not exists", key)
-				return
+		if repeat >= 1 {
+			for i := 0; i < repeat; i++ {
+				a.execZadd(cxt, key, score, strconv.Itoa(i))
 			}
-			log.Fatal(err)
 		}
-		log.Println(val)
+
 	} else {
 		ticker := time.NewTicker(time.Duration(a.Config.Interval) * time.Second)
 		done := make(chan bool)
@@ -56,19 +55,16 @@ func (a *App) Zadd(key string, score string, value string, period int) {
 				case <-done:
 					return
 				case t := <-ticker.C:
-					_, err := a.Rdb.Rdb.Do(cxt, "zadd", key, score, value).Result()
-					if err != nil {
-						if err == redis.Nil {
-							fmt.Printf("%s does not exists", key)
-							return
-						}
-						log.Fatal(err)
-					}
 					log.Println("[zadd]", t)
+					if repeat >= 1 {
+						for i := 0; i < repeat; i++ {
+							a.execZadd(cxt, key, score, strconv.Itoa(i))
+							fmt.Println(i)
+						}
+					}
 				}
 			}
 		}()
-
 		time.Sleep(time.Duration(period) * time.Second)
 		log.Println("[zdd] stopped", ticker.C)
 		ticker.Stop()
@@ -77,4 +73,15 @@ func (a *App) Zadd(key string, score string, value string, period int) {
 }
 
 func (a *App) Zrem(key string) {
+}
+
+func (a *App) execZadd(cxt context.Context, key string, score string, value string) {
+	_, err := a.Rdb.Rdb.Do(cxt, "zadd", key, score, value).Result()
+	if err != nil {
+		if err == redis.Nil {
+			fmt.Printf("%s does not exists", key)
+			return
+		}
+		log.Fatal(err)
+	}
 }
