@@ -39,7 +39,7 @@ func (a *App) Zadd(key string, score string, value string, period int, repeat in
 	if period == 0 {
 		if repeat >= 1 {
 			for i := 0; i < repeat; i++ {
-				a.execZadd(cxt, key, score, strconv.Itoa(i))
+				a.execZadd(cxt, key, strconv.Itoa(i))
 			}
 		}
 
@@ -58,7 +58,7 @@ func (a *App) Zadd(key string, score string, value string, period int, repeat in
 					log.Println("[zadd]", t)
 					if repeat >= 1 {
 						for i := 0; i < repeat; i++ {
-							a.execZadd(cxt, key, score, strconv.Itoa(i))
+							a.execZadd(cxt, key, strconv.Itoa(i))
 							fmt.Println(i)
 						}
 					}
@@ -75,8 +75,13 @@ func (a *App) Zadd(key string, score string, value string, period int, repeat in
 func (a *App) Zrem(key string) {
 }
 
-func (a *App) execZadd(cxt context.Context, key string, score string, value string) {
-	_, err := a.Rdb.Rdb.Do(cxt, "zadd", key, score, value).Result()
+func (a *App) execZadd(cxt context.Context, key string, index string) {
+
+	unixTime := strconv.FormatInt(time.Now().Unix(), 10)
+	dummyScore := unixTime + index
+	dummyValue := "DUMMY VALUE: " + dummyScore
+
+	_, err := a.Rdb.Rdb.Do(cxt, "zadd", key, dummyScore, dummyValue).Result()
 	if err != nil {
 		if err == redis.Nil {
 			fmt.Printf("%s does not exists", key)
